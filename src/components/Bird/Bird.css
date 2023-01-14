@@ -1,0 +1,9 @@
+#bird {
+    display: block;
+    position: absolute;
+    top: 370px;
+    left: 190px;
+    user-select: none;
+    z-index: 1000000;
+    width: 60px;
+}
