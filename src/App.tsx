@@ -27,6 +27,7 @@ function App() {
   const topObstacleRef = useRef<HTMLImageElement>(null)
   const obstaclesRef1 = useRef<HTMLDivElement>(null)
   const obstaclesRef2 = useRef<HTMLDivElement>(null)
+  const scoreRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     addEventListeners()
@@ -58,18 +59,21 @@ function App() {
     updateBirdPosition(delta)
     if (!shouldStartGame) {
       let newObstaclesData: ObstacleData[] = []
-      let obstaclesDataRef = updateObstaclesPosition(delta)!
-      LoopLable: for (let i = 0; i < obstaclesDataRef.length; i++) {
-        const { obstacles, obstaclePosiotion } = obstaclesDataRef[i]
-        const didCollided = collision(obstacles, obstaclePosiotion, birdRef, topObstacleRef)
+      updateObstaclesPosition(delta)!
+      LoopLable: for (let i = 0; i < obstaclesData.length; i++) {
+        const collided = collision(obstaclesData[i], birdRef, topObstacleRef)
         //if didCollided is true obstacleData.length will be 0 and then the else statement
         //will run below.
-        if (didCollided) { shouldStartGame = stopGame(); break LoopLable; }
-        //this section will only run if the user Passes an Obstacle.
-        if (!didCollided) updateScore();
-        const didObstaclePositionReset = resetObstaclePosition(obstacles)
+        if (typeof collided === 'boolean') {
+          if (collided) { shouldStartGame = stopGame(); break LoopLable; }
+          //this section will only run if the user Passes an Obstacle.
+          console.log(collided)
+          if (!collided) updateScore();
+        }
+
+        const didObstaclePositionReset = resetObstaclePosition(obstaclesData[i].obstacles)
         if (didObstaclePositionReset) {
-          newObstaclesData = removeFromObstacleData(obstacles, obstaclesDataRef)
+          newObstaclesData = removeFromObstacleData(obstaclesData[i].obstacles, obstaclesData)
           obstaclesData = newObstaclesData
         }
       }
@@ -113,10 +117,20 @@ function App() {
     document.removeEventListener('keydown', handleJump)
     sectionEle.removeEventListener('click', handleJump)
     obstaclesData = []
+    updateBestScore()
     return true
   }
 
+  function updateBestScore() {
+    const score = parseInt(scoreRef.current!.innerText)
+    const bestScore = JSON.parse(localStorage.getItem('score')!);
+    if (bestScore === null) localStorage.setItem('score', JSON.stringify(score));
+    if (bestScore < score) localStorage.setItem('score', JSON.stringify(score));
+  }
+
   function updateScore() {
+    const score = parseInt(scoreRef.current!.innerText)
+    scoreRef.current!.innerText = `${score + 1}`
   }
 
   function resetObstaclePosition(obstacles: Obstacles) {
@@ -153,6 +167,7 @@ function App() {
     tiemSinceLastObstacle = ObstacleInterval
     lastTime = null
     // start updateGamePlay
+    scoreRef.current!.innerText = '0'
     shouldStartGame = true
     setEndGamePopup(false)
     addEventListeners()
@@ -162,6 +177,7 @@ function App() {
     <>
       <div className="Game-container">
         <section>
+          <p id='score' ref={scoreRef}>{endGamePopup ? '' : 0}</p>
           <div className='game-background-img '>
             <div ref={birdRef} id="bird" >
               <img src={bird} alt="bird" />
@@ -180,9 +196,9 @@ function App() {
           <div id='end-game-popup'>
             <div id='score-container'>
               <p>Score</p>
-              <p id='score'>0</p>
+              <p>{scoreRef.current!.innerText}</p>
               <p>Best Score</p>
-              <p id='score'>0</p>
+              <p>{localStorage.getItem('score')}</p>
             </div>
             <button id='restart-button' onClick={handleRestartGame}>Restart</button>
           </div>

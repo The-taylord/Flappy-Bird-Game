@@ -25,7 +25,16 @@
     background-image: url('./assets/flappy-bird-bottom-background.png');
     height: 100px;
     position: relative;
-    z-index: 10000;
+    z-index: 2;
+}
+
+#score {
+    user-select: none;
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 400000;
 }
 
 #end-game-popup-container {
@@ -34,7 +43,7 @@
     left: 50%;
     transform: translate(-50%);
     width: 250px;
-    z-index: 90000;
+    z-index: 5;
 }
 
 #end-game-popup {
