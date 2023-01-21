@@ -9,7 +9,6 @@
     left: 500px;
     display: inline-block;
     user-select: none;
-    /* width: 78px; */
     transform: scaleX(var(--scaleX));
 }
 
@@ -20,7 +19,8 @@
 }
 
 .obstacle-container .obstacle-top {
-    transform: scaleY(1.1) rotateX(180deg);
+    /* transform: scaleY(1.1) rotateX(180deg); */
+    transform:  rotateX(180deg);
 }
 
 .obstacle-container .obstacle-bottom {

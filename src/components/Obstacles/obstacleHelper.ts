@@ -1,7 +1,4 @@
-import './Obstacles.css'
 import { ObstacleData, Obstacles } from './obstacleTypes'
-
-let collided = true
 
 export function collision(
     obstacleData: ObstacleData,
@@ -12,24 +9,23 @@ export function collision(
     const birdStyle = getComputedStyle(birdRef.current!)
     const obstacleStyle = getComputedStyle(obstacleData.obstacles.current!)
     const obstacleWidth = parseFloat(obstacleStyle.width)
-
+    //parseFloat(obstacleStyle.left) <= Math.abs(parseFloat(birdStyle.right) + 23
     //collided with the obstacles
-    if (parseFloat(obstacleStyle.left) <= Math.abs(parseFloat(birdStyle.right) + 23) &&
+    if (parseFloat(obstacleStyle.left) <= parseFloat(birdStyle.left)+ parseFloat(birdStyle.width) &&
         parseFloat(obstacleStyle.left) >= parseFloat(birdStyle.left) - obstacleWidth) {
-
+        console.log('hey')
         //fail
         const isInRange = isBirdInRange(obstacleData, topObstacleStyle, birdStyle)
         if (!isInRange) return true
         else {
             if (obstacleData.collided === null) {
                 obstacleData.collided = false
-                console.log(obstacleData.collided)
                 return obstacleData.collided
             }
         }
     }
     // collided with the floor
-    if (Math.abs(parseFloat(birdStyle.bottom)) <= 91) return collided;
+    if (Math.abs(parseFloat(birdStyle.bottom)) <= 91) return true;
 }
 
 function isBirdInRange(
@@ -38,9 +34,9 @@ function isBirdInRange(
     birdStyle: CSSStyleDeclaration) {
 
     const obstacleGap = Number(getComputedStyle(obstacleData.obstacles.current!).getPropertyValue('--obstacleGap'))
-    const obstacleLength = parseFloat(topObstacleStyle.height)
+    const obstacleHeight= parseFloat(topObstacleStyle.height)
 
-    const rangeStart = obstacleLength + obstacleData.obstaclePosiotion + 7
+    const rangeStart = obstacleHeight + obstacleData.obstaclePosiotion 
     const rangeEnd = (rangeStart + obstacleGap) - (parseFloat(birdStyle.height))
 
     if (parseFloat(birdStyle.top) > rangeStart &&
@@ -55,7 +51,7 @@ export function addToObstaclesData(obstacles: Obstacles, obstaclesData: Obstacle
 }
 
 export function randomizeObstaclesPostion(obstacles: Obstacles) {
-    const obstaclePosiotion = generateRandoNumber(15, -170)
+    const obstaclePosiotion = generateRandoNumber(1, -170)
     obstacles.current!.style.top = `${obstaclePosiotion}px`
     return obstaclePosiotion
 }

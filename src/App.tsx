@@ -3,7 +3,7 @@ import './App.css'
 import './components/Bird/Bird.css';
 import bird from './assets/flappy-bird.png'
 import { collision, addToObstaclesData } from './components/Obstacles/obstacleHelper'
-import { MoveBirdUP, moveBirdDown } from './components/Bird/birdHelper'
+import { getBirdPosition } from './components/Bird/birdHelper'
 import { ObstacleData, Obstacles } from './components/Obstacles/obstacleTypes'
 import Obstacle from './components/Obstacles/Obstacles'
 
@@ -13,12 +13,12 @@ let obstaclesData: ObstacleData[] = []
 const jumpDuration = 245
 let currentJumpTime = jumpDuration
 //obstacle var
-const ObstacleInterval = 870
+const ObstacleInterval = 1370
 let tiemSinceLastObstacle = ObstacleInterval
 //others
 let animationFrameId: number;
 let lastTime: null | number = null
-let sectionEle: HTMLElement;
+let game: HTMLElement;
 
 function App() {
 
@@ -35,8 +35,8 @@ function App() {
 
   function addEventListeners() {
     document.addEventListener('keydown', handleJump)
-    sectionEle = document.querySelector('section')!
-    sectionEle.addEventListener('click', handleJump)
+    game = document.getElementById('game')!
+    game.addEventListener('click', handleJump)
   }
 
   function handleJump(e: KeyboardEvent | MouseEvent) {
@@ -60,12 +60,12 @@ function App() {
     if (!shouldStartGame) {
       let newObstaclesData: ObstacleData[] = []
       updateObstaclesPosition(delta)!
-      LoopLable: for (let i = 0; i < obstaclesData.length; i++) {
+      gamePlayLoop: for (let i = 0; i < obstaclesData.length; i++) {
         const collided = collision(obstaclesData[i], birdRef, topObstacleRef)
         //if didCollided is true obstacleData.length will be 0 and then the else statement
         //will run below.
         if (typeof collided === 'boolean') {
-          if (collided) { shouldStartGame = stopGame(); break LoopLable; }
+          if (collided) { shouldStartGame = stopGame(); break gamePlayLoop; }
           //this section will only run if the user Passes an Obstacle.
           console.log(collided)
           if (!collided) updateScore();
@@ -78,28 +78,36 @@ function App() {
         }
       }
     } else {
+      setEndGamePopup(true)
       const hasBirdFallen = birdFall()
-      if (hasBirdFallen) { setEndGamePopup(true); return cancelAnimationFrame(animationFrameId) }
+      if (hasBirdFallen) return cancelAnimationFrame(animationFrameId)
     };
     animationFrameId = requestAnimationFrame(updateGamePlay)
   }
 
   function updateBirdPosition(delta: number) {
+    const birdSpeed = 0.3 * delta
+    const top = getBirdPosition(birdRef)
     if (currentJumpTime <= jumpDuration) {
-      MoveBirdUP(birdRef, delta)
-    } else { moveBirdDown(birdRef, delta) }
+      //move bird up
+      birdRef.current!.style.top = `${top - birdSpeed}px`
+    } else {
+      //move bird down
+      birdRef.current!.style.top = `${top + birdSpeed}px`
+    }
     currentJumpTime += delta
   }
 
   function updateObstaclesPosition(delta: number) {
     if (tiemSinceLastObstacle >= ObstacleInterval) {
       generateObstacles()
-    } else tiemSinceLastObstacle += 0.3 * delta;
+    } else tiemSinceLastObstacle += 0.5 * delta;
 
     obstaclesData.forEach((obstacleData) => {
+      const obstacleSpeed = 0.1 * delta
       const obstacleStyle = getComputedStyle(obstacleData.obstacles.current!)
       const obstacleLeft = parseFloat(obstacleStyle.left)
-      obstacleData.obstacles.current!.style.left = `${obstacleLeft - 0.1 * delta}px`
+      obstacleData.obstacles.current!.style.left = `${obstacleLeft - obstacleSpeed}px`
     })
     return obstaclesData
   }
@@ -108,29 +116,10 @@ function App() {
     const next = obstaclesData.some(obstacleData => obstacleData.obstacles === obstaclesRef1)
     const newxtObstacleRef = next ? obstaclesRef2 : obstaclesRef1
 
+    if (obstaclesData.length === 0 || obstaclesData.length == 1) tiemSinceLastObstacle = 0;
     if (obstaclesData.length === 1) addToObstaclesData(newxtObstacleRef, obstaclesData);
+    //this will betrue only once when the game first starts
     if (obstaclesData.length === 0) addToObstaclesData(obstaclesRef1, obstaclesData);
-    tiemSinceLastObstacle = 0
-  }
-
-  function stopGame() {
-    document.removeEventListener('keydown', handleJump)
-    sectionEle.removeEventListener('click', handleJump)
-    obstaclesData = []
-    updateBestScore()
-    return true
-  }
-
-  function updateBestScore() {
-    const score = parseInt(scoreRef.current!.innerText)
-    const bestScore = JSON.parse(localStorage.getItem('score')!);
-    if (bestScore === null) localStorage.setItem('score', JSON.stringify(score));
-    if (bestScore < score) localStorage.setItem('score', JSON.stringify(score));
-  }
-
-  function updateScore() {
-    const score = parseInt(scoreRef.current!.innerText)
-    scoreRef.current!.innerText = `${score + 1}`
   }
 
   function resetObstaclePosition(obstacles: Obstacles) {
@@ -151,13 +140,36 @@ function App() {
     return newObstaclesData
   }
 
+  function stopGame() {
+    document.removeEventListener('keydown', handleJump)
+    game.removeEventListener('click', handleJump)
+    currentJumpTime = jumpDuration
+    obstaclesData = []
+    updateBestScore()
+    return true
+  }
+
   function birdFall() {
     const birdStyle = getComputedStyle(birdRef.current!)
     if (Math.abs(parseFloat(birdStyle.bottom)) <= 91) return true;
     return false
   }
 
+  function updateScore() {
+    const score = parseInt(scoreRef.current!.innerText)
+    scoreRef.current!.innerText = `${score + 1}`
+  }
+
+  function updateBestScore() {
+    const score = parseInt(scoreRef.current!.innerText)
+    const bestScore = JSON.parse(localStorage.getItem('score')!);
+    if (bestScore === null) localStorage.setItem('score', JSON.stringify(score));
+    if (bestScore < score) localStorage.setItem('score', JSON.stringify(score));
+  }
+
   function handleRestartGame() {
+    //stop the any existing amnimation
+    cancelAnimationFrame(animationFrameId)
     // reset bird position
     birdRef.current!.style.top = '370px'
     // reset obstacles position
@@ -175,34 +187,37 @@ function App() {
 
   return (
     <>
-      <div className="Game-container">
-        <section>
-          <p id='score' ref={scoreRef}>{endGamePopup ? '' : 0}</p>
-          <div className='game-background-img '>
-            <div ref={birdRef} id="bird" >
-              <img src={bird} alt="bird" />
+      <p className='flappy-bird-text'>Flappy Bird</p>
+      <main>
+        <div className="Game-container">
+          <section id='game'>
+            <p id='score' ref={scoreRef}>{endGamePopup ? '' : 0}</p>
+            <div className='game-background-img '>
+              <div ref={birdRef} id="bird" >
+                <img src={bird} alt="bird" />
+              </div>
+              <Obstacle
+                topObstacleRef={topObstacleRef}
+                obstaclesRef={obstaclesRef1}
+              />
+              <Obstacle obstaclesRef={obstaclesRef2} />
             </div>
-            <Obstacle
-              topObstacleRef={topObstacleRef}
-              obstaclesRef={obstaclesRef1}
-            />
-            <Obstacle obstaclesRef={obstaclesRef2} />
-          </div>
-          <div className='game-forground-img'></div>
-        </section>
+            <div className='game-forground-img'></div>
+          </section>
 
-      </div>{
-        endGamePopup ? <div id='end-game-popup-container'>
-          <div id='end-game-popup'>
-            <div id='score-container'>
-              <p>Score</p>
-              <p>{scoreRef.current!.innerText}</p>
-              <p>Best Score</p>
-              <p>{localStorage.getItem('score')}</p>
+        </div>{
+          endGamePopup ? <div id='end-game-popup-container'>
+            <div id='end-game-popup'>
+              <div id='score-container'>
+                <p>Score</p>
+                <p>{scoreRef.current!.innerText}</p>
+                <p>Best Score</p>
+                <p>{localStorage.getItem('score')}</p>
+              </div>
+              <button id='restart-button' onClick={handleRestartGame}>Restart</button>
             </div>
-            <button id='restart-button' onClick={handleRestartGame}>Restart</button>
-          </div>
-        </div> : null}
+          </div> : null}
+      </main>
     </>
   );
 }
