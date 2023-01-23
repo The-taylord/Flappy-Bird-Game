@@ -1,62 +1,80 @@
-import { ObstacleData, Obstacles } from './obstacleTypes'
+import { ObstacleData, ObstacleType } from './obstacleTypes'
+interface CollisionAttr {
+    obstacleData: ObstacleData
+    bird: HTMLDivElement
+    topObstacleRef: React.RefObject<HTMLImageElement>
+}
 
-export function collision(
-    obstacleData: ObstacleData,
-    birdRef: React.RefObject<HTMLDivElement>,
-    topObstacleRef: React.RefObject<HTMLImageElement>) {
+interface isBirdBetweenGapAttr {
+    obstacleData: ObstacleData
+    topObstacleStyle: CSSStyleDeclaration
+    birdStyle: CSSStyleDeclaration
+}
+
+export function collision({ obstacleData, bird, topObstacleRef }: CollisionAttr) {
 
     const topObstacleStyle = getComputedStyle(topObstacleRef.current!)
-    const birdStyle = getComputedStyle(birdRef.current!)
-    const obstacleStyle = getComputedStyle(obstacleData.obstacles.current!)
+    const birdStyle = getComputedStyle(bird)
+    const obstacleStyle = getComputedStyle(obstacleData.obstacle)
+
     const obstacleWidth = parseFloat(obstacleStyle.width)
-    //parseFloat(obstacleStyle.left) <= Math.abs(parseFloat(birdStyle.right) + 23
-    //collided with the obstacles
-    if (parseFloat(obstacleStyle.left) <= parseFloat(birdStyle.left)+ parseFloat(birdStyle.width) &&
-        parseFloat(obstacleStyle.left) >= parseFloat(birdStyle.left) - obstacleWidth) {
-        console.log('hey')
-        //fail
-        const isInRange = isBirdInRange(obstacleData, topObstacleStyle, birdStyle)
-        if (!isInRange) return true
-        else {
-            if (obstacleData.collided === null) {
-                obstacleData.collided = false
-                return obstacleData.collided
-            }
-        }
+    const obstacleLeft = parseFloat(obstacleStyle.left)
+    const birdWidth = parseFloat(birdStyle.width)
+    const birdLeft = parseFloat(birdStyle.left)
+
+    if (obstacleLeft <= birdLeft + birdWidth && obstacleLeft >= birdLeft - obstacleWidth) {
+
+        if (!isBirdBetweenGap({ obstacleData, topObstacleStyle, birdStyle })) return true
+        else { if (obstacleData.collided === null) return obstacleData.collided = false }
     }
     // collided with the floor
-    if (Math.abs(parseFloat(birdStyle.bottom)) <= 91) return true;
+    return hasBirdFallen(bird)
 }
 
-function isBirdInRange(
-    obstacleData: ObstacleData,
-    topObstacleStyle: CSSStyleDeclaration,
-    birdStyle: CSSStyleDeclaration) {
-
-    const obstacleGap = Number(getComputedStyle(obstacleData.obstacles.current!).getPropertyValue('--obstacleGap'))
-    const obstacleHeight= parseFloat(topObstacleStyle.height)
-
-    const rangeStart = obstacleHeight + obstacleData.obstaclePosiotion 
-    const rangeEnd = (rangeStart + obstacleGap) - (parseFloat(birdStyle.height))
-
-    if (parseFloat(birdStyle.top) > rangeStart &&
-        parseFloat(birdStyle.top) < rangeEnd) {
-        return true
-    } else return false
+export function hasBirdFallen(bird: HTMLDivElement) {
+    const backgroundImgHeight = 530
+    const birdStyle = getComputedStyle(bird)
+    const birdHeight = parseFloat(birdStyle.height)
+    const birdTop = parseFloat(birdStyle.top)
+    if (birdTop >= backgroundImgHeight - birdHeight) return true;
 }
 
-export function addToObstaclesData(obstacles: Obstacles, obstaclesData: ObstacleData[]) {
-    const obstaclePosiotion = randomizeObstaclesPostion(obstacles)
-    obstaclesData.push({ obstacles, obstaclePosiotion, collided: null })
+function isBirdBetweenGap({ obstacleData, topObstacleStyle, birdStyle }: isBirdBetweenGapAttr) {
+
+    const obstacleGap = Number(getComputedStyle(obstacleData.obstacle).getPropertyValue('--obstacleGap'))
+    const obstacleHeight = parseFloat(topObstacleStyle.height)
+
+    const birdTop = parseFloat(birdStyle.top)
+    const birdHeight = parseFloat(birdStyle.height)
+
+    const rangeStart = obstacleHeight + obstacleData.obstaclePosiotion
+    const rangeEnd = rangeStart + obstacleGap - birdHeight
+
+    if (birdTop > rangeStart && birdTop < rangeEnd) return true
+    else return false
 }
 
-export function randomizeObstaclesPostion(obstacles: Obstacles) {
+export function addToObstaclesData(obstacle: React.RefObject<HTMLDivElement>, obstaclesData: ObstacleData[]) {
+    const obstacleElement = obstacle.current!
+    const obstaclePosiotion = randomizeObstaclesPostion(obstacleElement)
+    obstaclesData.push({ obstacle: obstacleElement, obstaclePosiotion, collided: null })
+}
+
+export function randomizeObstaclesPostion(obstacle: ObstacleType) {
     const obstaclePosiotion = generateRandoNumber(1, -170)
-    obstacles.current!.style.top = `${obstaclePosiotion}px`
+    obstacle.style.top = `${obstaclePosiotion}px`
     return obstaclePosiotion
 }
 
 const generateRandoNumber = (max: number, min: number) => {
     const randomValue = Math.floor(Math.random() * (max - min) + min)
     return randomValue
+}
+
+export function removeFromObstacleData(obstacles: ObstacleType, obstaclesData: ObstacleData[]) {
+    const newObstaclesData = obstaclesData.filter(obstacleData => {
+        if (!(obstacleData.obstacle === obstacles))
+            return obstacleData
+    })
+    return newObstaclesData
 }

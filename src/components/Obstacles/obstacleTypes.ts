@@ -1,6 +1,6 @@
-export type Obstacles = React.RefObject<HTMLDivElement>
+export type ObstacleType = HTMLDivElement
 export interface ObstacleData {
-    obstacles: Obstacles,
+    obstacle: ObstacleType,
     obstaclePosiotion: number,
     collided: null | boolean
 }

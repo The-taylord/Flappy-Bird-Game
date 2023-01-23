@@ -19,7 +19,6 @@
 }
 
 .obstacle-container .obstacle-top {
-    /* transform: scaleY(1.1) rotateX(180deg); */
     transform:  rotateX(180deg);
 }
 
