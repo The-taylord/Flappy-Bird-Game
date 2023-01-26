@@ -1,25 +1,25 @@
 :root {
-    --obstacleGap: 160;
+    --defaultObstacleLeftPosition: 325px;
+    --obstacleGap: 120;
     --scaleX: 1.3;
 }
 
 .obstacle-container {
+    display: inline-block;
+    left: var(--defaultObstacleLeftPosition);
     position: absolute;
     top: 0;
-    left: 500px;
-    display: inline-block;
     user-select: none;
-    transform: scaleX(var(--scaleX));
 }
 
 .obstacle-container .obstacle {
     display: block;
-    position: relative;
     margin: 0;
+    position: relative;
 }
 
 .obstacle-container .obstacle-top {
-    transform:  rotateX(180deg);
+    transform: rotateX(180deg);
 }
 
 .obstacle-container .obstacle-bottom {

@@ -9,15 +9,16 @@ import Obstacle from './components/Obstacles/Obstacles'
 
 let shouldStartGame = true
 let obstaclesData: ObstacleData[] = []
-//bird var
-const jumpDuration = 245
+//bird 
+const jumpDuration = 216.5
 let currentJumpTime = jumpDuration
-//obstacle var
-const ObstacleInterval = 1370
+//obstacle 
+const ObstacleInterval = 1100
 let tiemSinceLastObstacle = ObstacleInterval
-//others
+//
 let animationFrameId: number;
 let lastTime: null | number = null
+//
 let game: HTMLElement;
 
 function App() {
@@ -51,22 +52,19 @@ function App() {
   }
 
   function updateGamePlay(time: number) {
-    if (lastTime == null) lastTime = time
-    const delta = time - lastTime
-    lastTime = time
+    const lapse = getLapseTime(time)
 
-    updateBirdPosition(delta)
+    updateBirdPosition(lapse)
     if (!shouldStartGame) {
       let newObstaclesData: ObstacleData[] = []
-      updateObstaclesPosition(delta)!
+      updateObstaclesPosition(lapse)!
       gamePlayLoop: for (let i = 0; i < obstaclesData.length; i++) {
         const collided = collision({ obstacleData: obstaclesData[i], bird: birdRef.current!, topObstacleRef })
-        //if didCollided is true obstacleData.length will be 0 and then the else statement
+        //if collided is true obstacleData.length will be 0 and then the else statement
         //will run below.
         if (typeof collided === 'boolean') {
           if (collided) { shouldStartGame = stopGame(); break gamePlayLoop; }
           //this section will only run if the user Passes an Obstacle.
-          console.log(collided)
           if (!collided) updateScore();
         }
         const didObstaclePositionReset = resetObstaclePosition(obstaclesData[i].obstacle)
@@ -81,6 +79,13 @@ function App() {
       if (hasBirdFallen) return cancelAnimationFrame(animationFrameId)
     };
     animationFrameId = requestAnimationFrame(updateGamePlay)
+  }
+
+  function getLapseTime(time: number) {
+    if (lastTime == null) lastTime = time
+    const lapse = time - lastTime
+    lastTime = time
+    return lapse
   }
 
   function updateBirdPosition(delta: number) {
@@ -99,25 +104,24 @@ function App() {
 
   function updateObstaclesPosition(delta: number) {
     if (tiemSinceLastObstacle >= ObstacleInterval) {
-      generateObstacles()
+      generateObstacle()
     } else tiemSinceLastObstacle += 0.5 * delta;
 
     obstaclesData.forEach((obstacleData) => {
       const obstacleSpeed = 0.1 * delta
-      const obstacleStyle = getComputedStyle(obstacleData.obstacle)
-      const obstacleLeft = parseFloat(obstacleStyle.left)
+      const obstacleLeft = parseFloat(getComputedStyle(obstacleData.obstacle).left)
       obstacleData.obstacle.style.left = `${obstacleLeft - obstacleSpeed}px`
     })
     return obstaclesData
   }
 
-  function generateObstacles() {
+  function generateObstacle() {
     const next = obstaclesData.some(obstacleData => obstacleData.obstacle === obstaclesRef1.current!)
     const newxtObstacleRef = next ? obstaclesRef2 : obstaclesRef1
 
     if (obstaclesData.length === 0 || obstaclesData.length == 1) tiemSinceLastObstacle = 0;
     if (obstaclesData.length === 1) addToObstaclesData(newxtObstacleRef, obstaclesData);
-    //this will betrue only once when the game first starts
+    //this will be true only once, when the game first starts
     if (obstaclesData.length === 0) addToObstaclesData(obstaclesRef1, obstaclesData);
   }
 
@@ -128,7 +132,7 @@ function App() {
 
     if (obstacleStyleLeft < 0 &&
       Math.abs(obstacleStyleLeft) > obstacleStyleWidth) {
-      obstacle.style.left = '500px'
+      obstacle.style.left = getObstacleDefaultLeftPosition()
       return true
     }
     return false
@@ -162,28 +166,38 @@ function App() {
   function handleRestartGame() {
     //stop the any existing amnimation
     cancelAnimationFrame(animationFrameId)
-    // reset bird position
-    birdRef.current!.style.top = '370px'
-    // reset obstacles position
-    obstaclesRef1.current!.style.left = '500px'
-    obstaclesRef2.current!.style.left = '500px'
+    //reset bird position
+    birdRef.current!.style.top = getBirdDefaultTopPosition()
+    //reset obstacles position
+    const defalutLeftObstaclePosition = getObstacleDefaultLeftPosition()
+    obstaclesRef1.current!.style.left = defalutLeftObstaclePosition
+    obstaclesRef2.current!.style.left = defalutLeftObstaclePosition
     //tiemSinceLastObstacle
     tiemSinceLastObstacle = ObstacleInterval
+    //
     lastTime = null
     //reset score
     scoreRef.current!.innerText = '0'
     //empty obstacleData array
     obstaclesData = []
-    // start updateGamePlay
+    //start 
     shouldStartGame = true
     setEndGamePopup(false)
     addEventListeners()
   }
 
+  function getObstacleDefaultLeftPosition() {
+    return getComputedStyle(obstaclesRef1.current!).getPropertyValue('--defaultObstacleLeftPosition')!
+  }
+
+  function getBirdDefaultTopPosition() {
+    return getComputedStyle(birdRef.current!).getPropertyValue('--defaultBirdTopPosition')!
+  }
+
   return (
     <>
       <main>
-      <p className='flappy-bird-text'>Flappy Bird</p>
+        <p className='flappy-bird-text'>Flappy Bird</p>
         <div className="Game-container">
           <section id='game'>
             <p id='score' ref={scoreRef}>{endGamePopup ? '' : 0}</p>

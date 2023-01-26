@@ -1,32 +1,32 @@
 main {
-    background-color: rgb(246, 246, 203);
+    background-color: rgb(2, 2, 18);
     color: white;
 }
 
 .flappy-bird-text {
-    position: absolute;
-    margin-left: 10px;
-    color: black;
-    user-select: none;
-    font-size: 2.5rem;
+    color: rgb(255, 255, 255);
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-     z-index:50000;
+    font-size: 2.5rem;
+    margin: 10px;
+    position: absolute;
+    user-select: none;
+    z-index: 50000;
 }
 
 .Game-container {
-    width: 100%;
-    height: 100vh;
+    align-content: center;
     display: grid;
-    place-content: center;
-    font-size: 1.5rem;
+    height: 100vh;
+    justify-content: center;
+    width: 100%;
 }
 
 #game {
-    position: relative;
-    min-width: 250px;
-    width: 480px;
-    height: min-content;
+    height:471px;
     overflow: hidden;
+    position: relative;
+    top: 0;
+    width: 320px;
 }
 
 .game-forground-img, .game-background-img {
@@ -35,59 +35,60 @@ main {
 
 .game-background-img {
     background-image: url('./assets/fb-game-background.png');
-    height: 530px;
+    background-size:cover;
+    height: 371px;
     position: relative;
 }
 
 .game-forground-img {
     background-image: url('./assets/flappy-bird-bottom-background.png');
+    background-size:cover;
+    outline-offset: -3px;
     height: 100px;
     position: relative;
     z-index: 3;
 }
 
 #score {
-    user-select: none;
+    left: 50%;
     position: absolute;
     top: 15%;
-    left: 50%;
     transform: translate(-50%);
+    user-select: none;
     z-index: 400000;
 }
 
 #end-game-popup-container {
+    left: 50%;
     position: absolute;
     top: 25%;
-    left: 50%;
     transform: translate(-50%);
-    width: 250px;
+    width: 200px;
     z-index: 5;
 }
 
 #end-game-popup {
+    background-color: rgb(246, 38, 38);
     display: flex;
     flex-direction: column;
     gap: 10px;
-    height: 180px;
     padding: 10px;
-    background-color: rgb(246, 38, 38);
 }
 
 #restart-button {
-    width: fit-content;
-    padding: 10px;
-    font-size: 1.1rem;
     cursor: pointer;
+    padding: 10px;
+    width: fit-content;
 }
 
-@media screen and (max-width: 388px) {
-    #game {
-        transform: scale(0.66);
+@media screen and (min-width: 500px) {
+
+    .Game-container {
+        align-content:stretch
     }
-}
-
-@media screen and (min-width: 388px) and (max-width: 480px) {
+    
     #game {
-        transform: scale(0.8);
+        margin-top: 155px;
+        transform: scale(1.4);
     }
 }

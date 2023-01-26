@@ -4,7 +4,6 @@ interface CollisionAttr {
     bird: HTMLDivElement
     topObstacleRef: React.RefObject<HTMLImageElement>
 }
-
 interface isBirdBetweenGapAttr {
     obstacleData: ObstacleData
     topObstacleStyle: CSSStyleDeclaration
@@ -32,7 +31,7 @@ export function collision({ obstacleData, bird, topObstacleRef }: CollisionAttr)
 }
 
 export function hasBirdFallen(bird: HTMLDivElement) {
-    const backgroundImgHeight = 530
+    const backgroundImgHeight = 371
     const birdStyle = getComputedStyle(bird)
     const birdHeight = parseFloat(birdStyle.height)
     const birdTop = parseFloat(birdStyle.top)
@@ -61,7 +60,7 @@ export function addToObstaclesData(obstacle: React.RefObject<HTMLDivElement>, ob
 }
 
 export function randomizeObstaclesPostion(obstacle: ObstacleType) {
-    const obstaclePosiotion = generateRandoNumber(1, -170)
+    const obstaclePosiotion = generateRandoNumber(-100, -170)
     obstacle.style.top = `${obstaclePosiotion}px`
     return obstaclePosiotion
 }

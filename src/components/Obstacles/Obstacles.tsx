@@ -7,7 +7,6 @@ interface Props {
 }
 
 const Obstacle: React.FC<Props> = ({ obstaclesRef, topObstacleRef }) => {
-console.log("obstacles")
     return (
         <>
             <div

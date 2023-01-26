@@ -1,9 +1,10 @@
 #bird {
+    --defaultBirdTopPosition: 230px;
     display: block;
+    left: 100px;
     position: absolute;
-    top: 370px;
-    left: 190px;
+    top: var(--defaultBirdTopPosition);
     user-select: none;
+    width: 42px;
     z-index: 2;
-    width: 60px;
 }
