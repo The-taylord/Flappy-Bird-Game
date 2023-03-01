@@ -2,12 +2,13 @@ import { useRef, useEffect, useState } from 'react';
 import './App.css'
 import './components/Bird/Bird.css';
 import bird from './assets/flappy-bird.png'
-import { collision, addToObstaclesData, removeFromObstacleData, hasBirdFallen } from './components/Obstacles/obstacleHelper'
+import { pushToObstaclesData, removeFromObstacleData } from './components/Obstacles/obstacleHelper'
 import { getBirdPosition } from './components/Bird/birdHelper'
-import { ObstacleData, ObstacleType } from './components/Obstacles/obstacleTypes'
+import { collision, hasBirdFallen } from './components/collision'
+import { ObstacleData, ObstacleType } from './components/obstacleTypes'
 import Obstacle from './components/Obstacles/Obstacles'
 
-let shouldStartGame = true
+let isGamePlayActive = false
 let obstaclesData: ObstacleData[] = []
 //bird 
 const jumpDuration = 216.5
@@ -23,6 +24,7 @@ let game: HTMLElement;
 
 function App() {
 
+  const [isGameInstructionsOn, setIsGameInstructionsOn] = useState(true)
   const [endGamePopup, setEndGamePopup] = useState(false)
   const birdRef = useRef<HTMLImageElement>(null)
   const topObstacleRef = useRef<HTMLImageElement>(null)
@@ -43,11 +45,12 @@ function App() {
   function handleJump(e: KeyboardEvent | MouseEvent) {
     if ('code' in e) { if (e.code !== "Space") return }
     currentJumpTime = 0;
-    if (shouldStartGame) startGame();
+    if (!isGamePlayActive) startGame();
   }
 
   function startGame() {
-    shouldStartGame = false
+    isGamePlayActive = true
+    if (isGamePlayActive) setIsGameInstructionsOn(false)
     animationFrameId = requestAnimationFrame(updateGamePlay)
   }
 
@@ -55,7 +58,7 @@ function App() {
     const lapse = getLapseTime(time)
 
     updateBirdPosition(lapse)
-    if (!shouldStartGame) {
+    if (isGamePlayActive) {
       let newObstaclesData: ObstacleData[] = []
       updateObstaclesPosition(lapse)!
       gamePlayLoop: for (let i = 0; i < obstaclesData.length; i++) {
@@ -63,7 +66,7 @@ function App() {
         //if collided is true obstacleData.length will be 0 and then the else statement
         //will run below.
         if (typeof collided === 'boolean') {
-          if (collided) { shouldStartGame = stopGame(); break gamePlayLoop; }
+          if (collided) { isGamePlayActive = stopGame(); break gamePlayLoop; }
           //this section will only run if the user Passes an Obstacle.
           if (!collided) updateScore();
         }
@@ -88,8 +91,8 @@ function App() {
     return lapse
   }
 
-  function updateBirdPosition(delta: number) {
-    const birdSpeed = 0.3 * delta
+  function updateBirdPosition(lapse: number) {
+    const birdSpeed = 0.275 * lapse
     const birtStyle = birdRef.current!.style
     const top = getBirdPosition(birdRef)
     if (currentJumpTime <= jumpDuration) {
@@ -99,16 +102,16 @@ function App() {
       //move bird down
       birtStyle.top = `${top + birdSpeed}px`
     }
-    currentJumpTime += delta
+    currentJumpTime += lapse
   }
 
-  function updateObstaclesPosition(delta: number) {
+  function updateObstaclesPosition(lapse: number) {
     if (tiemSinceLastObstacle >= ObstacleInterval) {
       generateObstacle()
-    } else tiemSinceLastObstacle += 0.5 * delta;
+    } else tiemSinceLastObstacle += 0.5 * lapse;
 
     obstaclesData.forEach((obstacleData) => {
-      const obstacleSpeed = 0.1 * delta
+      const obstacleSpeed = 0.1 * lapse
       const obstacleLeft = parseFloat(getComputedStyle(obstacleData.obstacle).left)
       obstacleData.obstacle.style.left = `${obstacleLeft - obstacleSpeed}px`
     })
@@ -119,10 +122,10 @@ function App() {
     const next = obstaclesData.some(obstacleData => obstacleData.obstacle === obstaclesRef1.current!)
     const newxtObstacleRef = next ? obstaclesRef2 : obstaclesRef1
 
-    if (obstaclesData.length === 0 || obstaclesData.length == 1) tiemSinceLastObstacle = 0;
-    if (obstaclesData.length === 1) addToObstaclesData(newxtObstacleRef, obstaclesData);
+    if (obstaclesData.length === 0 || obstaclesData.length === 1) tiemSinceLastObstacle = 0;
+    if (obstaclesData.length === 1) pushToObstaclesData(newxtObstacleRef, obstaclesData);
     //this will be true only once, when the game first starts
-    if (obstaclesData.length === 0) addToObstaclesData(obstaclesRef1, obstaclesData);
+    if (obstaclesData.length === 0) pushToObstaclesData(obstaclesRef1, obstaclesData);
   }
 
   function resetObstaclePosition(obstacle: ObstacleType) {
@@ -143,7 +146,7 @@ function App() {
     game.removeEventListener('click', handleJump)
     currentJumpTime = jumpDuration
     updateBestScore()
-    return true
+    return false
   }
 
   function endGameBirdFall() {
@@ -153,7 +156,8 @@ function App() {
 
   function updateScore() {
     const score = parseInt(scoreRef.current!.innerText)
-    scoreRef.current!.innerText = `${score + 1}`
+    const incrementBy = 1
+    scoreRef.current!.innerText = `${score + incrementBy}`
   }
 
   function updateBestScore() {
@@ -181,8 +185,9 @@ function App() {
     //empty obstacleData array
     obstaclesData = []
     //start 
-    shouldStartGame = true
+    isGamePlayActive = false
     setEndGamePopup(false)
+    setIsGameInstructionsOn(true)
     addEventListeners()
   }
 
@@ -200,6 +205,7 @@ function App() {
         <p className='flappy-bird-text'>Flappy Bird</p>
         <div className="Game-container">
           <section id='game'>
+          {isGameInstructionsOn ? <p className='game-instructions'>left click or tap spacebar to start playing</p> : null}
             <p id='score' ref={scoreRef}>{endGamePopup ? '' : 0}</p>
             <div className='game-background-img '>
               <img ref={birdRef} id="bird" src={bird} alt="bird" />

@@ -1,15 +1,25 @@
-main {
-    background-color: rgb(2, 2, 18);
-    color: white;
+body {
+    background-color: rgba(9, 11, 20, 0.886);
+    color: rgb(255, 255, 255);
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    user-select: none;
+}
+
+.game-instructions{
+    font-family: Arial, Helvetica, sans-serif;
+    left: 50%;
+    position: absolute;
+    top: 180px;
+    transform: translate(-50%);
+    width: max-content;
+    z-index: 90000000000000;
 }
 
 .flappy-bird-text {
     color: rgb(255, 255, 255);
-    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     margin: 10px;
     position: absolute;
-    user-select: none;
     z-index: 50000;
 }
 
@@ -22,7 +32,7 @@ main {
 }
 
 #game {
-    height:471px;
+    height: 471px;
     overflow: hidden;
     position: relative;
     top: 0;
@@ -35,21 +45,22 @@ main {
 
 .game-background-img {
     background-image: url('./assets/fb-game-background.png');
-    background-size:cover;
+    background-size: cover;
     height: 371px;
     position: relative;
 }
 
 .game-forground-img {
     background-image: url('./assets/flappy-bird-bottom-background.png');
-    background-size:cover;
-    outline-offset: -3px;
+    background-size: cover;
     height: 100px;
+    outline-offset: -3px;
     position: relative;
     z-index: 3;
 }
 
 #score {
+    font-size: 40px;
     left: 50%;
     position: absolute;
     top: 15%;
@@ -61,22 +72,29 @@ main {
 #end-game-popup-container {
     left: 50%;
     position: absolute;
-    top: 25%;
+    top: 22%;
     transform: translate(-50%);
     width: 200px;
     z-index: 5;
 }
 
 #end-game-popup {
-    background-color: rgb(246, 38, 38);
+    background-color: rgb(246, 211, 38);
     display: flex;
     flex-direction: column;
+    font-size: 20px;
     gap: 10px;
     padding: 10px;
 }
 
 #restart-button {
+    background-color: rgb(248, 135, 21);
+    border: none;
+    color: white;
     cursor: pointer;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 30px;
+    letter-spacing: 1px;
     padding: 10px;
     width: fit-content;
 }
@@ -84,9 +102,9 @@ main {
 @media screen and (min-width: 500px) {
 
     .Game-container {
-        align-content:stretch
+        align-content: stretch
     }
-    
+
     #game {
         margin-top: 155px;
         transform: scale(1.4);
