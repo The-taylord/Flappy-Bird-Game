@@ -202,7 +202,6 @@ function App() {
   return (
     <>
       <main>
-        <p className='flappy-bird-text'>Flappy Bird</p>
         <div className="Game-container">
           <section id='game'>
           {isGameInstructionsOn ? <p className='game-instructions'>left click or tap spacebar to start playing</p> : null}
@@ -230,6 +229,7 @@ function App() {
           </section>
         </div>
       </main>
+        <div className='white-space'></div>
     </>
   );
 }

@@ -1,26 +1,9 @@
 body {
-    background-color: rgba(9, 11, 20, 0.886);
     color: rgb(255, 255, 255);
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     user-select: none;
-}
-
-.game-instructions{
-    font-family: Arial, Helvetica, sans-serif;
-    left: 50%;
-    position: absolute;
-    top: 180px;
-    transform: translate(-50%);
-    width: max-content;
-    z-index: 90000000000000;
-}
-
-.flappy-bird-text {
-    color: rgb(255, 255, 255);
-    font-size: 1.5rem;
-    margin: 10px;
-    position: absolute;
-    z-index: 50000;
+    background-color: rgba(44, 44, 44, 0.8);
+    background: url(./assets/Flappin-pattern.-dissolvejpg.jpg);
 }
 
 .Game-container {
@@ -31,12 +14,24 @@ body {
     width: 100%;
 }
 
+.game-instructions {
+    font-family: Arial, Helvetica, sans-serif;
+    left: 50%;
+    position: absolute;
+    top: 180px;
+    transform: translate(-50%);
+    width: max-content;
+    z-index: 90000000000000;
+}
+
 #game {
     height: 471px;
     overflow: hidden;
     position: relative;
     top: 0;
     width: 320px;
+    box-shadow: -25px 25px 23px rgba(2, 6, 1, 0.381);
+    margin-bottom: 30px;
 }
 
 .game-forground-img, .game-background-img {
@@ -79,7 +74,7 @@ body {
 }
 
 #end-game-popup {
-    background-color: rgb(246, 211, 38);
+    background-color: rgba(246, 211, 38, 0.871);
     display: flex;
     flex-direction: column;
     font-size: 20px;
@@ -88,7 +83,7 @@ body {
 }
 
 #restart-button {
-    background-color: rgb(248, 135, 21);
+    background-color: rgba(248, 135, 21, 0.669);
     border: none;
     color: white;
     cursor: pointer;
@@ -97,6 +92,10 @@ body {
     letter-spacing: 1px;
     padding: 10px;
     width: fit-content;
+}
+
+.white-space {
+    display: none;
 }
 
 @media screen and (min-width: 500px) {
@@ -108,5 +107,13 @@ body {
     #game {
         margin-top: 155px;
         transform: scale(1.4);
+    }
+
+    .white-space {
+        display: block;
+        height: 800px;
+        inset: 0;
+        position: absolute;
+        z-index: -1;
     }
 }
